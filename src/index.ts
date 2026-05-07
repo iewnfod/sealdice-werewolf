@@ -68,6 +68,7 @@ const extName = '狼人杀';
 const author = 'Iewnfod';
 const version = pkg.version;
 const STORAGE_KEY = 'werewolf:state:v1';
+const TIME_ZONE = 'Asia/Shanghai';
 const DEFAULT_CONFIG: GameConfig = {
   mode: '屠边',
   playerCount: 9,
@@ -94,8 +95,12 @@ function createRet(showHelp = false): seal.CmdExecuteResult {
   return ret;
 }
 
-function now(): number {
+function nowUnixTimestamp(): number {
   return Math.floor(Date.now() / 1000);
+}
+
+function isRoleType(value: string): value is RoleType {
+  return ['狼人', '预言家', '女巫', '猎人', '守卫', '村民'].includes(value);
 }
 
 function parseStorage(ext: seal.ExtInfo): StorageRoot {
@@ -118,7 +123,7 @@ function saveStorage(ext: seal.ExtInfo, storage: StorageRoot): void {
 function pushLog(game: WerewolfGame, text: string): void {
   const stamp = new Date().toLocaleString('zh-CN', {
     hour12: false,
-    timeZone: 'Asia/Shanghai',
+    timeZone: TIME_ZONE,
   });
   game.logs.push(`[${stamp}] ${text}`);
 }
@@ -448,7 +453,7 @@ function tallyVotes(votes: Record<string, number>): [number | undefined, boolean
 function createHistoryItem(game: WerewolfGame): GameHistoryItem {
   return {
     startedAt: game.createdAt,
-    endedAt: game.endedAt ?? now(),
+    endedAt: game.endedAt ?? nowUnixTimestamp(),
     mode: game.config.mode,
     winner: game.winner ?? '未结算',
     rounds: game.night?.round ?? 0,
@@ -459,7 +464,7 @@ function createHistoryItem(game: WerewolfGame): GameHistoryItem {
 function endGame(game: WerewolfGame, winner: string): string {
   game.phase = 'ended';
   game.winner = winner;
-  game.endedAt = now();
+  game.endedAt = nowUnixTimestamp();
   pushLog(game, `游戏结束，胜者：${winner}`);
   return `游戏结束，胜者：${winner}。可使用“.狼人杀 历史”查看对局记录。`;
 }
@@ -536,9 +541,9 @@ function parseConfigArgs(game: WerewolfGame, args: string[]): [boolean, string] 
       return [false, `参数格式错误：${raw}，应为 角色=数量`];
     }
 
-    const role = parts[0] as RoleType;
+    const roleRaw = parts[0];
     const value = Number(parts[1]);
-    if (!Object.prototype.hasOwnProperty.call(game.config.roleCounts, role)) {
+    if (!isRoleType(roleRaw)) {
       return [false, `未知角色：${parts[0]}`];
     }
 
@@ -546,7 +551,7 @@ function parseConfigArgs(game: WerewolfGame, args: string[]): [boolean, string] 
       return [false, `角色数量需为非负整数：${raw}`];
     }
 
-    game.config.roleCounts[role] = value;
+    game.config.roleCounts[roleRaw] = value;
   }
 
   return [true, 'ok'];
@@ -778,7 +783,7 @@ function main(): void {
           sheriffVotes: {},
           dayVotes: {},
           logs: [],
-          createdAt: now(),
+          createdAt: nowUnixTimestamp(),
         };
 
         const args = cmdArgs.args.slice(2);
@@ -1114,7 +1119,7 @@ function main(): void {
         if (game.phase !== 'ended') {
           game.phase = 'ended';
           game.winner = winner;
-          game.endedAt = now();
+          game.endedAt = nowUnixTimestamp();
           pushLog(game, '对局被手动结束。');
         }
 
@@ -1140,7 +1145,7 @@ function main(): void {
                 `  模式：${item.mode}`,
                 `  胜者：${item.winner}`,
                 `  夜晚轮数：${item.rounds}`,
-                `  结束时间：${new Date(item.endedAt * 1000).toLocaleString('zh-CN', { hour12: false, timeZone: 'Asia/Shanghai' })}`,
+                `  结束时间：${new Date(item.endedAt * 1000).toLocaleString('zh-CN', { hour12: false, timeZone: TIME_ZONE })}`,
               ].join('\n');
             })
             .join('\n');
