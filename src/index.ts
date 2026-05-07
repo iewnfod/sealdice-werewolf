@@ -291,19 +291,6 @@ function judgeWinner(game: WerewolfGame): string | undefined {
   return undefined;
 }
 
-function findSingleCurrentRolePlayer(game: WerewolfGame, role: NightRole): PlayerState | undefined {
-  const list = getAliveByRole(game, role);
-  if (role === '狼人') {
-    return undefined;
-  }
-
-  if (list.length === 1) {
-    return list[0];
-  }
-
-  return undefined;
-}
-
 function nightOrderFor(game: WerewolfGame): NightRole[] {
   const result: NightRole[] = [];
   if (getAliveByRole(game, '守卫').length > 0) {
@@ -1148,7 +1135,13 @@ function main(): void {
         if (!index) {
           const text = histories
             .map((item, i) => {
-              return `${i + 1}. 模式:${item.mode} 胜者:${item.winner} 夜晚轮数:${item.rounds} 结束时间:${new Date(item.endedAt * 1000).toLocaleString('zh-CN', { hour12: false })}`;
+              return [
+                `${i + 1}.`,
+                `  模式：${item.mode}`,
+                `  胜者：${item.winner}`,
+                `  夜晚轮数：${item.rounds}`,
+                `  结束时间：${new Date(item.endedAt * 1000).toLocaleString('zh-CN', { hour12: false })}`,
+              ].join('\n');
             })
             .join('\n');
           seal.replyToSender(ctx, msg, `[狼人杀] 历史列表：\n${text}\n使用“.狼人杀 历史 序号”查看详情。`);
