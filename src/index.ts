@@ -46,6 +46,7 @@ interface WerewolfGame {
   dayVotes: Record<string, number>;
   logs: string[];
   winner?: string;
+  pendingNightReport?: string;
   createdAt: number;
   endedAt?: number;
 }
@@ -419,6 +420,14 @@ function resolveNight(game: WerewolfGame): string {
   game.dayVotes = {};
   const deadText = dead.length > 0 ? dead.join('、') : '平安夜';
   pushLog(game, `天亮了，死亡结果：${deadText}`);
+
+  if (game.night.round === 1) {
+    game.phase = 'sheriff';
+    game.sheriffVotes = {};
+    game.pendingNightReport = deadText;
+    return `天亮了，请先竞选警长。请使用“.狼人杀 投票警长 座号”投票，主持人使用“.狼人杀 结束警长投票”结算。`;
+  }
+
   return `天亮了，昨夜结果：${deadText}。存活：${formatAliveSeats(game)}。请使用“.狼人杀 投票 座号”开始白天放逐投票，主持人使用“.狼人杀 结束投票”结算。`;
 }
 
@@ -698,9 +707,9 @@ function formatHelp(): string {
     '.狼人杀 开始 [屠边|屠城] [人数] [角色=数量...]    创建房间并设置配置',
     '.狼人杀 加入                                      加入当前房间',
     '.狼人杀 退出                                      退出未开局房间',
-    '.狼人杀 开局                                      发牌并进入警长投票阶段',
+    '.狼人杀 开局                                      发牌并进入第一夜',
     '.狼人杀 投票警长 座号                            投票警长',
-    '.狼人杀 结束警长投票                              结算警长并进入夜晚',
+    '.狼人杀 结束警长投票                              结算警长并在首日播报夜晚情况',
     '.狼人杀 投票 座号                                  白天投票放逐',
     '.狼人杀 结束投票                                  结算白天投票',
     '.狼人杀 下一夜                                    白天结束后进入下一夜',
@@ -914,10 +923,10 @@ function main(): void {
           item.role = rolePool[index];
         });
 
-        game.phase = 'sheriff';
         game.sheriffVotes = {};
         game.dayVotes = {};
-        pushLog(game, '游戏开局，进入警长投票阶段。');
+        const nightPrompt = initNight(game);
+        pushLog(game, '游戏开局，进入第一夜。');
         writeGame(storage, game);
         saveStorage(ext, storage);
 
@@ -937,7 +946,7 @@ function main(): void {
           msg,
           `[狼人杀] 开局成功，座位：${game.players
             .map((item) => `${item.seat}.${item.name}`)
-            .join('、')}。\n请使用“.狼人杀 投票警长 座号”投票，主持人使用“.狼人杀 结束警长投票”结算。`,
+            .join('、')}。\n${nightPrompt}`,
         );
         return ret;
       }
@@ -992,10 +1001,26 @@ function main(): void {
           pushLog(game, `警长选举完成，${seat}号当选警长。`);
         }
 
+        const pendingNightReport = game.pendingNightReport;
+        game.pendingNightReport = undefined;
+        const sheriffText = game.sheriffSeat ? `${game.sheriffSeat}号当选警长。` : '本局无警长。';
+
+        if (pendingNightReport) {
+          game.phase = 'day';
+          game.dayVotes = {};
+          writeGame(storage, game);
+          saveStorage(ext, storage);
+          seal.replyToSender(
+            ctx,
+            msg,
+            `[狼人杀] 警长投票结束，${sheriffText}\n昨夜结果：${pendingNightReport}。存活：${formatAliveSeats(game)}。请使用“.狼人杀 投票 座号”开始白天放逐投票，主持人使用“.狼人杀 结束投票”结算。`,
+          );
+          return ret;
+        }
+
         const prompt = initNight(game);
         writeGame(storage, game);
         saveStorage(ext, storage);
-        const sheriffText = game.sheriffSeat ? `${game.sheriffSeat}号当选警长。` : '本局无警长。';
         seal.replyToSender(ctx, msg, `[狼人杀] 警长投票结束，${sheriffText}\n${prompt}`);
         return ret;
       }
