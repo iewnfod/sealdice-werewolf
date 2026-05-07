@@ -118,6 +118,7 @@ function saveStorage(ext: seal.ExtInfo, storage: StorageRoot): void {
 function pushLog(game: WerewolfGame, text: string): void {
   const stamp = new Date().toLocaleString('zh-CN', {
     hour12: false,
+    timeZone: 'Asia/Shanghai',
   });
   game.logs.push(`[${stamp}] ${text}`);
 }
@@ -906,7 +907,6 @@ function main(): void {
         const rolePool = shuffle(buildRolePool(game.config));
         game.players.forEach((item, index) => {
           item.role = rolePool[index];
-          item.alive = true;
         });
 
         game.phase = 'sheriff';
@@ -1140,7 +1140,7 @@ function main(): void {
                 `  模式：${item.mode}`,
                 `  胜者：${item.winner}`,
                 `  夜晚轮数：${item.rounds}`,
-                `  结束时间：${new Date(item.endedAt * 1000).toLocaleString('zh-CN', { hour12: false })}`,
+                `  结束时间：${new Date(item.endedAt * 1000).toLocaleString('zh-CN', { hour12: false, timeZone: 'Asia/Shanghai' })}`,
               ].join('\n');
             })
             .join('\n');
