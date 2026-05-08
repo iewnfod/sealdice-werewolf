@@ -64,6 +64,7 @@ export type StorageRoot = {
   histories: Record<string, GameHistoryItem[]>;
 };
 
+export const GOD_ROLES: RoleType[] = ['预言家', '女巫', '猎人', '守卫'];
 export const extName = '狼人杀';
 export const author = 'Iewnfod';
 export const STORAGE_KEY = 'werewolf:state:v1';

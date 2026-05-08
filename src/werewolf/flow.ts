@@ -1,5 +1,6 @@
 import { nowUnixTimestamp } from './time';
 import { formatAliveSeats, getAliveByRole, getAlivePlayers, getSeatPlayer, pushLog } from './core';
+import { GOD_ROLES } from './types';
 import type { CampType, NightRole, RoleType, WerewolfGame } from './types';
 
 function roleCamp(role: RoleType): CampType {
@@ -25,7 +26,6 @@ function aliveCampCount(game: WerewolfGame): { wolf: number; good: number } {
 }
 
 function aliveGodAndVillager(game: WerewolfGame): { god: number; villager: number } {
-  const gods: RoleType[] = ['预言家', '女巫', '猎人', '守卫'];
   let god = 0;
   let villager = 0;
 
@@ -38,7 +38,7 @@ function aliveGodAndVillager(game: WerewolfGame): { god: number; villager: numbe
       return;
     }
 
-    if (gods.includes(item.role)) {
+    if (GOD_ROLES.includes(item.role)) {
       god += 1;
     } else {
       villager += 1;

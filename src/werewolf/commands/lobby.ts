@@ -1,13 +1,13 @@
 import { nowUnixTimestamp } from '../time';
 import type { CommandContext } from '../interfaces';
-import type { GameConfig, PlayerState, StorageRoot, WerewolfGame } from '../types';
+import type { GameConfig, PlayerState, RoleType, StorageRoot, WerewolfGame } from '../types';
 
 type LobbyDeps = {
   cloneDefaultConfig: () => GameConfig;
   parseConfigArgs: (game: WerewolfGame, args: string[]) => [boolean, string];
   summarizeRoles: (config: GameConfig) => string;
   canStartGame: (game: WerewolfGame) => [boolean, string];
-  buildRolePool: (config: GameConfig) => string[];
+  buildRolePool: (config: GameConfig) => RoleType[];
   shuffle: <T>(arr: T[]) => T[];
   initNight: (game: WerewolfGame) => string;
   getPlayer: (game: WerewolfGame, userId: string) => PlayerState | undefined;
@@ -163,7 +163,7 @@ export function handleLobbyCommands(arg1: string, command: CommandContext, deps:
 
     const rolePool = deps.shuffle(deps.buildRolePool(game.config));
     game.players.forEach((item, index) => {
-      item.role = rolePool[index] as any;
+      item.role = rolePool[index];
     });
 
     game.sheriffVotes = {};

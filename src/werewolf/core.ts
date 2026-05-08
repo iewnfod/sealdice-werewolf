@@ -88,7 +88,7 @@ export function tallyVotes(votes: Record<string, number>): [number | undefined, 
     }
   });
 
-  if (!maxSeat || maxVotes === 0) {
+  if (!maxSeat) {
     return [undefined, false];
   }
 

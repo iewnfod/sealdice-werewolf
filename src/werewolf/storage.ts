@@ -2,11 +2,12 @@ import type { GameHistoryItem, StorageRoot, WerewolfGame } from './types';
 import { STORAGE_KEY } from './types';
 import { nowUnixTimestamp } from './time';
 
-const HISTORY_ID_RANGE = 36 ** 4;
+const BASE36_FOUR_DIGIT_RANGE = 36 ** 4;
+const MAX_HISTORY_ITEMS = 20;
 
 function createHistoryId(game: WerewolfGame): string {
   const time = nowUnixTimestamp().toString(36);
-  const random = Math.floor(Math.random() * HISTORY_ID_RANGE)
+  const random = Math.floor(Math.random() * BASE36_FOUR_DIGIT_RANGE)
     .toString(36)
     .padStart(4, '0');
   return `${game.groupId}-${time}-${random}`;
@@ -63,7 +64,7 @@ export function removeGame(storage: StorageRoot, groupId: string): void {
 export function persistFinishedGame(storage: StorageRoot, game: WerewolfGame): void {
   const list = storage.histories[game.groupId] ?? [];
   list.unshift(createHistoryItem(game));
-  storage.histories[game.groupId] = list.slice(0, 20);
+  storage.histories[game.groupId] = list.slice(0, MAX_HISTORY_ITEMS);
 }
 
 export function findHistoryById(storage: StorageRoot, groupId: string, historyId: string): GameHistoryItem | undefined {
