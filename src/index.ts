@@ -1,94 +1,22 @@
 import pkg from '../package.json';
+import { formatHelp } from './werewolf/help';
+import { parseStorage, persistFinishedGame, readGame, removeGame, saveStorage, writeGame } from './werewolf/storage';
+import {
+  author,
+  DEFAULT_CONFIG,
+  extName,
+  TIME_ZONE,
+  type CampType,
+  type GameConfig,
+  type GameMode,
+  type NightRole,
+  type PlayerState,
+  type RoleType,
+  type StorageRoot,
+  type WerewolfGame,
+} from './werewolf/types';
 
-type CampType = 'good' | 'wolf';
-type GameMode = '屠边' | '屠城';
-type RoleType = '狼人' | '预言家' | '女巫' | '猎人' | '守卫' | '村民';
-type PhaseType = 'lobby' | 'sheriff' | 'night' | 'day' | 'ended';
-type NightRole = '守卫' | '狼人' | '预言家' | '女巫';
-
-interface PlayerState {
-  userId: string;
-  name: string;
-  seat: number;
-  role?: RoleType;
-  alive: boolean;
-}
-
-interface GameConfig {
-  mode: GameMode;
-  playerCount: number;
-  roleCounts: Record<RoleType, number>;
-}
-
-interface NightState {
-  round: number;
-  order: NightRole[];
-  stepIndex: number;
-  wolfTarget?: number;
-  guardTarget?: number;
-  seerChecked?: number;
-  witchSaveUsed: boolean;
-  witchPoisonUsed: boolean;
-  witchSaveTarget?: number;
-  witchPoisonTarget?: number;
-}
-
-interface WerewolfGame {
-  groupId: string;
-  groupName: string;
-  hostUserId: string;
-  config: GameConfig;
-  phase: PhaseType;
-  sheriffSeat?: number;
-  players: PlayerState[];
-  night?: NightState;
-  sheriffVotes: Record<string, number>;
-  dayVotes: Record<string, number>;
-  logs: string[];
-  winner?: string;
-  pendingNightReport?: string;
-  createdAt: number;
-  endedAt?: number;
-}
-
-interface GameHistoryItem {
-  startedAt: number;
-  endedAt: number;
-  mode: GameMode;
-  winner: string;
-  rounds: number;
-  summary: string[];
-}
-
-type StorageRoot = {
-  games: Record<string, WerewolfGame>;
-  histories: Record<string, GameHistoryItem[]>;
-};
-
-const extName = '狼人杀';
-const author = 'Iewnfod';
 const version = pkg.version;
-const STORAGE_KEY = 'werewolf:state:v1';
-const TIME_ZONE = 'Asia/Shanghai';
-const DEFAULT_CONFIG: GameConfig = {
-  mode: '屠边',
-  playerCount: 9,
-  roleCounts: {
-    狼人: 3,
-    预言家: 1,
-    女巫: 1,
-    猎人: 1,
-    守卫: 1,
-    村民: 2,
-  },
-};
-
-function createDefaultStorage(): StorageRoot {
-  return {
-    games: {},
-    histories: {},
-  };
-}
 
 function createRet(showHelp = false): seal.CmdExecuteResult {
   const ret = seal.ext.newCmdExecuteResult(true);
@@ -102,23 +30,6 @@ function nowUnixTimestamp(): number {
 
 function isRoleType(value: string): value is RoleType {
   return ['狼人', '预言家', '女巫', '猎人', '守卫', '村民'].includes(value);
-}
-
-function parseStorage(ext: seal.ExtInfo): StorageRoot {
-  const raw = ext.storageGet(STORAGE_KEY);
-  if (!raw) {
-    return createDefaultStorage();
-  }
-
-  try {
-    return JSON.parse(raw) as StorageRoot;
-  } catch (_error) {
-    return createDefaultStorage();
-  }
-}
-
-function saveStorage(ext: seal.ExtInfo, storage: StorageRoot): void {
-  ext.storageSet(STORAGE_KEY, JSON.stringify(storage));
 }
 
 function pushLog(game: WerewolfGame, text: string): void {
@@ -459,17 +370,6 @@ function tallyVotes(votes: Record<string, number>): [number | undefined, boolean
   return [maxSeat, tie];
 }
 
-function createHistoryItem(game: WerewolfGame): GameHistoryItem {
-  return {
-    startedAt: game.createdAt,
-    endedAt: game.endedAt ?? nowUnixTimestamp(),
-    mode: game.config.mode,
-    winner: game.winner ?? '未结算',
-    rounds: game.night?.round ?? 0,
-    summary: [...game.logs],
-  };
-}
-
 function endGame(game: WerewolfGame, winner: string): string {
   game.phase = 'ended';
   game.winner = winner;
@@ -504,24 +404,6 @@ function renderStatus(game: WerewolfGame): string {
   }
 
   return base.join('\n');
-}
-
-function readGame(storage: StorageRoot, groupId: string): WerewolfGame | undefined {
-  return storage.games[groupId];
-}
-
-function writeGame(storage: StorageRoot, game: WerewolfGame): void {
-  storage.games[game.groupId] = game;
-}
-
-function removeGame(storage: StorageRoot, groupId: string): void {
-  delete storage.games[groupId];
-}
-
-function persistFinishedGame(storage: StorageRoot, game: WerewolfGame): void {
-  const list = storage.histories[game.groupId] ?? [];
-  list.unshift(createHistoryItem(game));
-  storage.histories[game.groupId] = list.slice(0, 20);
 }
 
 function parseConfigArgs(game: WerewolfGame, args: string[]): [boolean, string] {
@@ -699,27 +581,6 @@ function findPrivateActionGame(storage: StorageRoot, userId: string): WerewolfGa
 
     return player.role === role;
   });
-}
-
-function formatHelp(): string {
-  return [
-    '狼人杀扩展命令：',
-    '.狼人杀 开始 [屠边|屠城] [人数] [角色=数量...] - 创建房间并设置配置',
-    '.狼人杀 加入 - 加入当前房间',
-    '.狼人杀 退出 - 退出未开局房间',
-    '.狼人杀 开局 - 发牌并进入第一夜',
-    '.狼人杀 投票警长 座号 - 投票警长',
-    '.狼人杀 结束警长投票 - 结算警长并在首日播报夜晚情况',
-    '.狼人杀 投票 座号 - 白天投票放逐',
-    '.狼人杀 结束投票 - 结算白天投票',
-    '.狼人杀 下一夜 - 白天结束后进入下一夜',
-    '.狼人杀 状态 - 查看当前局状态',
-    '.狼人杀 历史 [序号] - 查看历史记录',
-    '.狼人杀 结束 - 强制结束当前对局',
-    '私聊命令：',
-    '.狼人杀 行动 座号 - （守卫/狼人/预言家）',
-    '.狼人杀 行动 救 座号 | 毒 座号 | 跳过 - （女巫）',
-  ].join('\n');
 }
 
 function main(): void {
