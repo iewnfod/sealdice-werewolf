@@ -6,11 +6,12 @@ const BASE36_FOUR_DIGIT_RANGE = 36 ** 4;
 const MAX_HISTORY_ITEMS = 20;
 
 function createHistoryId(game: WerewolfGame): string {
+  const start = game.createdAt.toString(36);
   const time = nowUnixTimestamp().toString(36);
   const random = Math.floor(Math.random() * BASE36_FOUR_DIGIT_RANGE)
     .toString(36)
     .padStart(4, '0');
-  return `${game.groupId}-${time}-${random}`;
+  return `${game.groupId}-${start}-${time}-${random}`;
 }
 
 function createDefaultStorage(): StorageRoot {

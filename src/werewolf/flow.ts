@@ -162,8 +162,10 @@ function resolveNight(game: WerewolfGame): string {
 
   const { wolfTarget, guardTarget, witchSaveTarget, witchPoisonTarget } = game.night;
   const dead: string[] = [];
+  const isGuardProtected = wolfTarget && wolfTarget === guardTarget;
+  const isWitchSaved = wolfTarget && witchSaveTarget === wolfTarget;
 
-  if (wolfTarget && wolfTarget !== guardTarget && wolfTarget !== witchSaveTarget) {
+  if (wolfTarget && !isGuardProtected && !isWitchSaved) {
     const name = killSeat(game, wolfTarget, '夜晚袭击');
     if (name) {
       dead.push(name);

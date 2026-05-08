@@ -1,6 +1,8 @@
 import { TIME_ZONE } from './types';
 import type { GameConfig, PlayerState, RoleType, WerewolfGame } from './types';
 
+export type VoteTallyResult = [number | undefined, boolean];
+
 export function createRet(showHelp = false): seal.CmdExecuteResult {
   const ret = seal.ext.newCmdExecuteResult(true);
   ret.showHelp = showHelp;
@@ -67,7 +69,7 @@ export function buildRolePool(config: GameConfig): RoleType[] {
   return result;
 }
 
-export function tallyVotes(votes: Record<string, number>): [number | undefined, boolean] {
+export function tallyVotes(votes: Record<string, number>): VoteTallyResult {
   const counter = new Map<number, number>();
   Object.values(votes).forEach((seat) => {
     const old = counter.get(seat) ?? 0;

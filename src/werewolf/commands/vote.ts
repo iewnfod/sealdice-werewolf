@@ -1,12 +1,13 @@
 import type { CommandContext } from '../interfaces';
 import type { PlayerState, StorageRoot, WerewolfGame } from '../types';
+import type { VoteTallyResult } from '../core';
 
 type VoteDeps = {
   parseSeat: (value: string) => number | undefined;
   seatExistsAndAlive: (game: WerewolfGame, seat: number) => [boolean, string];
   getPlayer: (game: WerewolfGame, userId: string) => PlayerState | undefined;
   formatAliveSeats: (game: WerewolfGame) => string;
-  tallyVotes: (votes: Record<string, number>) => [number | undefined, boolean];
+  tallyVotes: (votes: Record<string, number>) => VoteTallyResult;
   killSeat: (game: WerewolfGame, seat: number, reason: string) => string | undefined;
   judgeWinner: (game: WerewolfGame) => string | undefined;
   endGame: (game: WerewolfGame, winner: string) => string;
