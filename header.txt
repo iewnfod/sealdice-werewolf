@@ -3,7 +3,7 @@
 // @author       Iewnfod
 // @version      1.0.0
 // @description  使用<.狼人杀>进行游戏吧~
-// @timestamp    1778227827
+// @timestamp    1778228120
 // @license      MIT
 // @homepageURL  https://github.com/iewnfod/sealdice-werewolf
 // ==/UserScript==
