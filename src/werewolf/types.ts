@@ -50,6 +50,7 @@ export interface WerewolfGame {
 }
 
 export interface GameHistoryItem {
+  id: string;
   startedAt: number;
   endedAt: number;
   mode: GameMode;

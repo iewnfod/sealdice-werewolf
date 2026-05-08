@@ -2,6 +2,14 @@ import type { GameHistoryItem, StorageRoot, WerewolfGame } from './types';
 import { STORAGE_KEY } from './types';
 import { nowUnixTimestamp } from './time';
 
+function createHistoryId(game: WerewolfGame): string {
+  const time = nowUnixTimestamp().toString(36);
+  const random = Math.floor(Math.random() * 1679616)
+    .toString(36)
+    .padStart(4, '0');
+  return `${game.groupId}-${time}-${random}`;
+}
+
 function createDefaultStorage(): StorageRoot {
   return {
     games: {},
@@ -28,6 +36,7 @@ export function saveStorage(ext: seal.ExtInfo, storage: StorageRoot): void {
 
 function createHistoryItem(game: WerewolfGame): GameHistoryItem {
   return {
+    id: createHistoryId(game),
     startedAt: game.createdAt,
     endedAt: game.endedAt ?? nowUnixTimestamp(),
     mode: game.config.mode,
@@ -53,4 +62,9 @@ export function persistFinishedGame(storage: StorageRoot, game: WerewolfGame): v
   const list = storage.histories[game.groupId] ?? [];
   list.unshift(createHistoryItem(game));
   storage.histories[game.groupId] = list.slice(0, 20);
+}
+
+export function findHistoryById(storage: StorageRoot, groupId: string, historyId: string): GameHistoryItem | undefined {
+  const list = storage.histories[groupId] ?? [];
+  return list.find((item) => item.id === historyId);
 }
