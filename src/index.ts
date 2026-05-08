@@ -14,7 +14,7 @@ import { author, extName } from './werewolf/types';
 
 const version = pkg.version;
 
-function buildCommandContext(ctx: any, msg: any, cmdArgs: any, ext: seal.ExtInfo): CommandContext {
+function buildCommandContext(ctx: seal.MsgContext, msg: seal.Message, cmdArgs: seal.CmdArgs, ext: seal.ExtInfo): CommandContext {
   const storage = parseStorage(ext);
   const groupId = ctx.group?.groupId ?? '';
   const userId = ctx.player.userId;

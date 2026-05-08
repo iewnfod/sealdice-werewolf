@@ -1,5 +1,5 @@
 import type { CommandContext } from '../interfaces';
-import type { PlayerState, WerewolfGame } from '../types';
+import type { PlayerState, StorageRoot, WerewolfGame } from '../types';
 
 type VoteDeps = {
   parseSeat: (value: string) => number | undefined;
@@ -12,8 +12,8 @@ type VoteDeps = {
   endGame: (game: WerewolfGame, winner: string) => string;
   initNight: (game: WerewolfGame) => string;
   pushLog: (game: WerewolfGame, text: string) => void;
-  writeGame: (storage: any, game: WerewolfGame) => void;
-  saveStorage: (ext: seal.ExtInfo, storage: any) => void;
+  writeGame: (storage: StorageRoot, game: WerewolfGame) => void;
+  saveStorage: (ext: seal.ExtInfo, storage: StorageRoot) => void;
 };
 
 export function handleVoteCommands(arg1: string, command: CommandContext, deps: VoteDeps): boolean {

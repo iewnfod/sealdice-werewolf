@@ -2,14 +2,14 @@ import { findHistoryById } from '../storage';
 import { renderHistoryDetail, renderHistoryList } from '../history';
 import { nowUnixTimestamp } from '../time';
 import type { CommandContext } from '../interfaces';
-import type { WerewolfGame } from '../types';
+import type { StorageRoot, WerewolfGame } from '../types';
 
 type MetaDeps = {
   renderStatus: (game: WerewolfGame) => string;
   pushLog: (game: WerewolfGame, text: string) => void;
-  persistFinishedGame: (storage: any, game: WerewolfGame) => void;
-  removeGame: (storage: any, groupId: string) => void;
-  saveStorage: (ext: seal.ExtInfo, storage: any) => void;
+  persistFinishedGame: (storage: StorageRoot, game: WerewolfGame) => void;
+  removeGame: (storage: StorageRoot, groupId: string) => void;
+  saveStorage: (ext: seal.ExtInfo, storage: StorageRoot) => void;
 };
 
 export function handleMetaCommands(arg1: string, command: CommandContext, deps: MetaDeps): boolean {

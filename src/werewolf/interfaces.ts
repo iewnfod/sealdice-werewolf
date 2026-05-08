@@ -4,9 +4,9 @@ export type BoolResult = [boolean, string];
 export type NightActionResult = [boolean, string, string];
 
 export interface CommandContext {
-  ctx: any;
-  msg: any;
-  cmdArgs: any;
+  ctx: seal.MsgContext;
+  msg: seal.Message;
+  cmdArgs: seal.CmdArgs;
   ext: seal.ExtInfo;
   storage: StorageRoot;
   groupId: string;

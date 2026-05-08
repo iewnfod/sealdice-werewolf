@@ -1,6 +1,6 @@
 import { nowUnixTimestamp } from '../time';
 import type { CommandContext } from '../interfaces';
-import type { GameConfig, PlayerState, WerewolfGame } from '../types';
+import type { GameConfig, PlayerState, StorageRoot, WerewolfGame } from '../types';
 
 type LobbyDeps = {
   cloneDefaultConfig: () => GameConfig;
@@ -12,9 +12,9 @@ type LobbyDeps = {
   initNight: (game: WerewolfGame) => string;
   getPlayer: (game: WerewolfGame, userId: string) => PlayerState | undefined;
   pushLog: (game: WerewolfGame, text: string) => void;
-  writeGame: (storage: any, game: WerewolfGame) => void;
-  removeGame: (storage: any, groupId: string) => void;
-  saveStorage: (ext: seal.ExtInfo, storage: any) => void;
+  writeGame: (storage: StorageRoot, game: WerewolfGame) => void;
+  removeGame: (storage: StorageRoot, groupId: string) => void;
+  saveStorage: (ext: seal.ExtInfo, storage: StorageRoot) => void;
 };
 
 export function handleLobbyCommands(arg1: string, command: CommandContext, deps: LobbyDeps): boolean {

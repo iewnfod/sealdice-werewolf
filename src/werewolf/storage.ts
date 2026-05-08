@@ -2,9 +2,11 @@ import type { GameHistoryItem, StorageRoot, WerewolfGame } from './types';
 import { STORAGE_KEY } from './types';
 import { nowUnixTimestamp } from './time';
 
+const HISTORY_ID_RANGE = 36 ** 4;
+
 function createHistoryId(game: WerewolfGame): string {
   const time = nowUnixTimestamp().toString(36);
-  const random = Math.floor(Math.random() * 1679616)
+  const random = Math.floor(Math.random() * HISTORY_ID_RANGE)
     .toString(36)
     .padStart(4, '0');
   return `${game.groupId}-${time}-${random}`;
