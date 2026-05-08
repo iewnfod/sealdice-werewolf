@@ -1,6 +1,6 @@
 {
   "name": "sealdice-eat-what",
-  "version": "1.0.3",
+  "version": "1.0.0",
   "main": "build/index.js",
   "typings": "build/index.d.ts",
   "repository": "https://github.com/iewnfod/sealdice-eat",

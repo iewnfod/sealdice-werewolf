@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         吃了么
 // @author       Iewnfod
-// @version      1.0.3
-// @description  使用 .eat_what 获取随机食物
-// @timestamp    1773933541
+// @version      1.0.0
+// @description  使用<.狼人杀>进行游戏吧~
+// @timestamp    1778227735
 // @license      MIT
-// @homepageURL  https://github.com/iewnfod/sealdice-eat
+// @homepageURL  https://github.com/iewnfod/sealdice-werewolf
 // ==/UserScript==
