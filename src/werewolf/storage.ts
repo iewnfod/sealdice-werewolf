@@ -1,9 +1,6 @@
 import type { GameHistoryItem, StorageRoot, WerewolfGame } from './types';
 import { STORAGE_KEY } from './types';
-
-function nowUnixTimestamp(): number {
-  return Math.floor(Date.now() / 1000);
-}
+import { nowUnixTimestamp } from './time';
 
 function createDefaultStorage(): StorageRoot {
   return {

@@ -1,6 +1,7 @@
 import pkg from '../package.json';
 import { formatHelp } from './werewolf/help';
 import { parseStorage, persistFinishedGame, readGame, removeGame, saveStorage, writeGame } from './werewolf/storage';
+import { nowUnixTimestamp } from './werewolf/time';
 import {
   author,
   DEFAULT_CONFIG,
@@ -22,10 +23,6 @@ function createRet(showHelp = false): seal.CmdExecuteResult {
   const ret = seal.ext.newCmdExecuteResult(true);
   ret.showHelp = showHelp;
   return ret;
-}
-
-function nowUnixTimestamp(): number {
-  return Math.floor(Date.now() / 1000);
 }
 
 function isRoleType(value: string): value is RoleType {
