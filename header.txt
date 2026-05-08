@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         吃了么
+// @name         狼人杀
 // @author       Iewnfod
 // @version      1.0.0
 // @description  使用<.狼人杀>进行游戏吧~
-// @timestamp    1778227735
+// @timestamp    1778227827
 // @license      MIT
 // @homepageURL  https://github.com/iewnfod/sealdice-werewolf
 // ==/UserScript==
