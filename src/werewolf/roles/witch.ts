@@ -30,12 +30,12 @@ export function handleWitchAction(game: WerewolfGame, player: PlayerState, args:
       return [false, '你的解药已使用过。', ''];
     }
 
-    if (game.night!.wolfTarget !== seat) {
-      return [false, '本夜该座号不是被狼人袭击目标，不能使用解药。', ''];
+    if (!game.night!.wolfTarget) {
+      return [false, '本夜没有可救的狼人袭击目标。', ''];
     }
 
-    if (game.night!.guardTarget === seat) {
-      return [false, '该目标已被守卫守护，无需使用解药。', ''];
+    if (game.night!.wolfTarget !== seat) {
+      return [false, '本夜该座号不是被狼人袭击目标，不能使用解药。', ''];
     }
 
     game.night!.witchSaveUsed = true;

@@ -10,7 +10,8 @@ function createHistoryId(game: WerewolfGame): string {
   const time = nowUnixTimestamp().toString(36);
   const random = Math.floor(Math.random() * BASE36_FOUR_DIGIT_RANGE)
     .toString(36)
-    .padStart(4, '0');
+    .padStart(4, '0')
+    .slice(-4);
   return `${game.groupId}-${start}-${time}-${random}`;
 }
 
