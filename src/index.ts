@@ -14,6 +14,18 @@ import { author, extName } from './werewolf/types';
 
 const version = pkg.version;
 
+function collectArgs(cmdArgs: seal.CmdArgs, startIndex: number): string[] {
+  const result: string[] = [];
+  for (let i = startIndex; ; i += 1) {
+    const value = cmdArgs.getArgN(i);
+    if (!value) {
+      break;
+    }
+    result.push(value);
+  }
+  return result;
+}
+
 function buildCommandContext(ctx: seal.MsgContext, msg: seal.Message, cmdArgs: seal.CmdArgs, ext: seal.ExtInfo): CommandContext {
   const storage = parseStorage(ext);
   const groupId = ctx.group?.groupId ?? '';
@@ -35,7 +47,7 @@ function solvePrivateCommand(command: CommandContext, arg1: string): boolean {
     return true;
   }
 
-  const args = cmdArgs.args.slice(2);
+  const args = collectArgs(cmdArgs, 2);
   const [ok, privateMsg, groupMsg] = handleNightActionPrivate(game, ctx.player.userId, args, {
     parseSeat,
     getPlayer,

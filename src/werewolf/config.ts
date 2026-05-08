@@ -6,11 +6,12 @@ export function isRoleType(value: string): value is RoleType {
 }
 
 export function parseMode(raw: string): GameMode | undefined {
-  if (raw === '屠边' || raw === 'tb') {
+  const normalized = raw.trim().toLowerCase();
+  if (normalized === '屠边' || normalized === 'tb' || normalized === '屠边/tb') {
     return '屠边';
   }
 
-  if (raw === '屠城' || raw === 'tc') {
+  if (normalized === '屠城' || normalized === 'tc' || normalized === '屠城/tc') {
     return '屠城';
   }
 
@@ -74,6 +75,13 @@ export function parseConfigArgs(game: WerewolfGame, args: string[]): [boolean, s
     game.config.playerCount = count;
   }
 
+  if (args.length > 2) {
+    (Object.keys(game.config.roleCounts) as RoleType[]).forEach((role) => {
+      game.config.roleCounts[role] = 0;
+    });
+  }
+
+  const specifiedRoles = new Set<RoleType>();
   for (let i = 2; i < args.length; i += 1) {
     const raw = args[i];
     const parts = raw.split('=');
@@ -92,6 +100,18 @@ export function parseConfigArgs(game: WerewolfGame, args: string[]): [boolean, s
     }
 
     game.config.roleCounts[roleRaw] = value;
+    specifiedRoles.add(roleRaw);
+  }
+
+  if (specifiedRoles.size > 0 && !specifiedRoles.has('村民')) {
+    const nonVillagerTotal = (Object.keys(game.config.roleCounts) as RoleType[])
+      .filter((role) => role !== '村民')
+      .reduce((sum, role) => sum + game.config.roleCounts[role], 0);
+    const villagerCount = game.config.playerCount - nonVillagerTotal;
+    if (villagerCount < 0) {
+      return [false, `非村民角色总数(${nonVillagerTotal})超过总人数(${game.config.playerCount})`];
+    }
+    game.config.roleCounts.村民 = villagerCount;
   }
 
   return [true, 'ok'];

@@ -17,6 +17,18 @@ type LobbyDeps = {
   saveStorage: (ext: seal.ExtInfo, storage: StorageRoot) => void;
 };
 
+function collectArgs(cmdArgs: seal.CmdArgs, startIndex: number): string[] {
+  const result: string[] = [];
+  for (let i = startIndex; ; i += 1) {
+    const value = cmdArgs.getArgN(i);
+    if (!value) {
+      break;
+    }
+    result.push(value);
+  }
+  return result;
+}
+
 export function handleLobbyCommands(arg1: string, command: CommandContext, deps: LobbyDeps): boolean {
   const { ctx, msg, cmdArgs, ext, storage, groupId, userId, game } = command;
 
@@ -39,7 +51,7 @@ export function handleLobbyCommands(arg1: string, command: CommandContext, deps:
       createdAt: nowUnixTimestamp(),
     };
 
-    const args = cmdArgs.args.slice(2);
+    const args = collectArgs(cmdArgs, 2);
     const [ok, parseMsg] = deps.parseConfigArgs(newGame, args);
     if (!ok) {
       seal.replyToSender(ctx, msg, parseMsg);
